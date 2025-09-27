@@ -1,0 +1,1 @@
+gcc -Wall main.c manager.c loader.o -o a2
