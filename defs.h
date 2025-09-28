@@ -4,73 +4,78 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_ARR   16
-#define MAX_STR   32
+#define MAX_ARR 16
+#define MAX_STR 32
 
-#define C_ERR_OK          0
-#define C_ERR_NULL_PTR   -1
+#define C_ERR_OK 0
+#define C_ERR_NULL_PTR -1
 #define C_ERR_FULL_ARRAY -2
-#define C_ERR_NOT_FOUND  -3
-#define C_ERR_DUPLICATE  -4
-#define C_ERR_INVALID    -5
+#define C_ERR_NOT_FOUND -3
+#define C_ERR_DUPLICATE -4
+#define C_ERR_INVALID -5
 #define C_ERR_NOT_IMPLEMENTED -99 // No function should return this by the end of your assignment
 
 /* NOTE: Enumerated Data Types might be better for this, but we have not discussed these. */
-#define TYPE_TEMP    1
-#define TYPE_DB      2
-#define TYPE_MOTION  3
+#define TYPE_TEMP 1
+#define TYPE_DB 2
+#define TYPE_MOTION 3
 
-typedef struct Room     Room;
+typedef struct Room Room;
 typedef struct LogEntry LogEntry;
 
-typedef union {
-    float         temperature;   /* °C */
-    int           decibels;      /* dB */
-    unsigned char motion[3];     /* {left, forward, right} as either 0 or 1 */
+typedef union
+{
+    float temperature;       /* °C */
+    int decibels;            /* dB */
+    unsigned char motion[3]; /* {left, forward, right} as either 0 or 1 */
 } ReadingValue;
 
-typedef struct {
-    int          type;           /* TYPE_* defined valule */
+typedef struct
+{
+    int type; /* TYPE_* defined valule */
     ReadingValue value;
 } Reading;
 
 /* One log entry belongs to a room and has a timestamp */
-struct LogEntry {
-    Reading  data;
-    Room    *room;
-    int      timestamp;
+struct LogEntry
+{
+    Reading data;
+    Room *room;
+    int timestamp;
 };
 
 /* One room has a name and a collection of pointers to its log entries */
-struct Room {
-    char      name[MAX_STR];
-    LogEntry* entries[MAX_ARR];
-    int       size;
+struct Room
+{
+    char name[MAX_STR];
+    LogEntry *entries[MAX_ARR];
+    int size;
 };
 
-typedef struct {
+typedef struct
+{
     Room rooms[MAX_ARR];
-    int  size;
+    int size;
 } RoomCollection;
 
-typedef struct {
+typedef struct
+{
     LogEntry entries[MAX_ARR];
-    int      size;
+    int size;
 } EntryCollection;
 
-
+void error_print(int code);
 int rooms_add(RoomCollection *rc, const char *room_name);
 int entries_create(EntryCollection *ec,
-                Room            *room,
-                int              type,
-                ReadingValue     value,
-                int              timestamp);
+                   Room *room,
+                   int type,
+                   ReadingValue value,
+                   int timestamp);
 
-Room* rooms_find(RoomCollection *rc, const char *room_name);
+Room *rooms_find(RoomCollection *rc, const char *room_name);
 int room_print(const Room *r);
 int entry_print(const LogEntry *e);
 int entry_cmp(const LogEntry *a, const LogEntry *b);
-
 
 /* =========================================
    Loader (provided as an object file)

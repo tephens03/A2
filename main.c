@@ -1,16 +1,80 @@
 #include "defs.h"
 
 // Static declares that this function can only be found in this file and not during linking
-static void print_menu(int* choice);
+static void print_menu(int *choice);
+static void get_entry_value(ReadingValue *reading);
 
-int main(void) {
-  RoomCollection  rooms   = { .size = 0 };
-  EntryCollection entries = { .size = 0 };
-  
+int main(void)
+{
+  RoomCollection rooms = {.size = 0};
+  EntryCollection entries = {.size = 0};
+  while (1)
+  {
+    int choice;
+    int status = 1000;
+    char buffer[MAX_STR];
+
+    print_menu(&choice);
+    if (choice == 1)
+    {
+    }
+    else if (choice == 2)
+    {
+    }
+    else if (choice == 3)
+    {
+      printf("Here are list of (%i) rooms:\n", rooms.size);
+      for (int i = 0; i < rooms.size; i++)
+        room_print(&rooms.rooms[i]);
+    }
+    else if (choice == 4)
+    {
+      printf("Enter room name: ");
+      fgets(buffer, MAX_STR, stdin);
+      buffer[strcspn(buffer, "\n")] = '\0';
+      status = rooms_add(&rooms, buffer); // main operation
+    }
+
+    else if (choice == 5)
+    {
+      printf("== Adding New Entry. \n");
+
+      // get room to add for
+      printf("Room name: ");
+      fgets(buffer, MAX_STR, stdin);
+      buffer[strcspn(buffer, "\n")] = '\0';
+      Room *room = rooms_find(&rooms, buffer);
+
+      printf("Timestamp (int): ");
+      int timestamp;
+      scanf("%d", &timestamp);
+
+      ReadingValue readingValue;
+      get_entry_value(&readingValue);
+
+      status = entries_create(&entries,room,type,timestamp);
+    }
+
+    else if (choice == 6)
+    {
+    }
+    else if (choice == 7)
+    {
+    }
+    else if (choice == 0)
+    {
+      break;
+    }
+
+    error_print(status);
+  }
+
   return 0;
 }
 
-void print_menu(int* choice) {
+void print_menu(int *choice)
+
+{
   int c = -1;
   int rc = 0;
   const int num_options = 7;
@@ -25,12 +89,46 @@ void print_menu(int* choice) {
   printf("  (7) Test room entries\n");
   printf("  (0) Exit\n\n");
 
-  do {
+  do
+  {
     printf("Please enter a valid selection: ");
     // Check if they entered a non-integer
     rc = scanf("%d", &c);
-    while (getchar() != '\n');
+    while (getchar() != '\n')
+      ;
   } while (rc < 1 || c < 0 || c > num_options);
 
   *choice = c;
+}
+
+void get_entry_value(ReadingValue *reading)
+{
+  printf("Type (1=TEMP, 2=DB, 3=MOTION): ");
+  int type;
+  scanf("%d", &type);
+  switch (type)
+  {
+  case TYPE_TEMP:
+    printf("Enter temperature: ");
+    float temp;
+    scanf("%f", &temp);
+    reading->temperature = temp;
+    break;
+
+  case TYPE_DB:
+    printf("Enter decibel: ");
+    float decibel;
+    scanf("%f", &decibel);
+    reading->decibels = decibel;
+    break;
+
+  default:
+    unsigned char l, m, r;
+    printf("Enter motions: ");
+    scanf("%d %d %d", &l, &m, &r);
+    reading->motion[0] = l;
+    reading->motion[1] = m;
+    reading->motion[2] = r;
+    break;
+  }
 }
