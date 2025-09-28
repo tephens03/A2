@@ -2,7 +2,6 @@
 
 // Static declares that this function can only be found in this file and not during linking
 static void print_menu(int *choice);
-static ReadingValue get_entry_value(int type);
 
 int main(void)
 {
@@ -17,7 +16,17 @@ int main(void)
     print_menu(&choice);
     if (choice == 1)
     {
+      if (!freopen("./inputs.txt", "r", stdin))
+      {
+        perror("freopen");
+        status = C_ERR_NULL_PTR;
+      }
+      else
+      {
+        printf("Loaded input script from file.\n");
+      }
     }
+
     else if (choice == 2)
     {
       printf("%-15s  %10s  %-6s    %15s\n", "Room", "Timestamp", "Type", "Value");
@@ -56,7 +65,9 @@ int main(void)
       printf("Type (1=TEMP, 2=DB, 3=MOTION): ");
       int type;
       scanf("%d", &type);
-      ReadingValue reading = get_entry_value(type);
+      
+      ReadingValue reading;
+      get_entry_value(&reading, type);
 
       status = entries_create(&entries, room, type, reading, timestamp);
     }
@@ -105,37 +116,4 @@ void print_menu(int *choice)
   } while (rc < 1 || c < 0 || c > num_options);
 
   *choice = c;
-}
-
-ReadingValue get_entry_value(int type)
-{
-  ReadingValue reading;
-
-  switch (type)
-  {
-  case TYPE_TEMP:
-    printf("Enter temperature: ");
-    float temp;
-    scanf("%f", &temp);
-    reading.temperature = temp;
-    break;
-
-  case TYPE_DB:
-    printf("Enter decibel: ");
-    float decibel;
-    scanf("%f", &decibel);
-    reading.decibels = decibel;
-    break;
-
-  default:
-    printf("Enter motions: ");
-    unsigned char l, f, r;
-    scanf("%s %s %s", &l, &f, &r);
-    reading.motion[0] = l;
-    reading.motion[1] = f;
-    reading.motion[2] = r;
-    break;
-  }
-
-  return reading;
 }

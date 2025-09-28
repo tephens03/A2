@@ -77,6 +77,8 @@ int room_print(const Room *r);
 int entry_print(const LogEntry *e);
 int entry_cmp(const LogEntry *a, const LogEntry *b);
 
+int get_entry_value(ReadingValue *reading, int type);
+
 /* =========================================
    Loader (provided as an object file)
    =========================================

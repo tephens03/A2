@@ -116,7 +116,6 @@ int entries_create(EntryCollection *ec, Room *room, int type, ReadingValue value
 int entry_print(const LogEntry *e)
 {
 
-
   char value[MAX_STR];
   const char *type;
 
@@ -140,7 +139,6 @@ int entry_print(const LogEntry *e)
   }
 
   printf("%-15s  %10d  %-6s    %15s\n", e->room->name, e->timestamp, type, value);
-  printf("\n");
 
   return C_ERR_OK;
 }
@@ -188,6 +186,12 @@ int room_print(const Room *r)
   return C_ERR_OK;
 }
 
+/* ---- error_print ------------------------------------------------------------
+   Purpose: Print the message associated with an error code return.
+   Params:
+     - code (in): error code to print
+   Returns: None
+----------------------------------------------------------------------------- */
 void error_print(int code)
 {
   switch (code)
@@ -219,8 +223,50 @@ void error_print(int code)
   }
 }
 
-/* ---- entry_print -----------------------------------------------------------
-  Purpose: Shift old entries to the right and find the correct spot the new entry
-  Params:
-    -
- */
+/* ---- get_entry_value ------------------------------------------------------------
+   Purpose: Get user input values to establish an entry.
+    - Returns: C_ERR_OK, C_ERR_INVALID
+----------------------------------------------------------------------------- */
+int get_entry_value(ReadingValue *reading, int type)
+{
+  switch (type)
+  {
+  case TYPE_TEMP:
+    printf("Enter temperature: ");
+    float temp;
+    if (scanf("%f", &temp) == 0)
+      return C_ERR_INVALID;
+    reading->temperature = temp;
+    break;
+
+  case TYPE_DB:
+    printf("Enter decibel: ");
+    float decibel;
+    if (scanf("%f", &decibel) == 0)
+      return C_ERR_INVALID;
+    reading->decibels = decibel;
+    break;
+
+  default:
+    printf("Enter motions: ");
+    unsigned char l, f, r;
+    if (scanf("%s %s %s", &l, &f, &r) != 3)
+      return C_ERR_INVALID;
+    reading->motion[0] = l;
+    reading->motion[1] = f;
+    reading->motion[2] = r;
+    break;
+  }
+  return C_ERR_OK;
+}
+
+/* ---- room_print ------------------------------------------------------------
+   Purpose: Override the contents of the collections with sample data.
+    - rc (out): room collection
+    - ec (out): entry collection
+    - Returns: C_ERR_OK, C_ERR_NULL_PTR
+----------------------------------------------------------------------------- */
+int load_sample(RoomCollection *rc, EntryCollection *ec)
+{
+  return 0;
+}
