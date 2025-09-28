@@ -83,15 +83,18 @@ int entries_create(EntryCollection *ec, Room *room, int type, ReadingValue value
                        .room = room,
                        .data = {.type = type, .value = value}};
 
+  // Index variable to shift element to right
   int i = ec->size;
+
   int status = 1;
+
   while (i > 0 && (status = entry_cmp(&ec->entries[i - 1], &newEntry)) > 0)
   {
     ec->entries[i] = ec->entries[i - 1];
-    // ec->entries[i].room;
-    for (int j = 0; j < ec->entries[i].room->size; j++) {
-      entry_cmp(&ec->entries[j], &newEntry);
-    }
+
+    for (int j = 0; j < ec->entries[i].room->size; j++)
+      if (entry_cmp(ec->entries[i].room->entries[j], &ec->entries[i]) == 0)
+        ec->entries[i].room->entries[j]++;
     i--;
   }
 
@@ -113,7 +116,33 @@ int entries_create(EntryCollection *ec, Room *room, int type, ReadingValue value
 int entry_print(const LogEntry *e)
 {
 
-  return C_ERR_NOT_IMPLEMENTED; // Remove once implemented
+
+  char value[MAX_STR];
+  const char *type;
+
+  switch (e->data.type)
+  {
+  case TYPE_TEMP:
+    snprintf(value, sizeof(value), "%.1f C", e->data.value.temperature);
+    type = "TEMP";
+    break;
+  case TYPE_DB:
+    snprintf(value, sizeof(value), "%d DB", e->data.value.decibels);
+    type = "DB";
+    break;
+  default:
+    snprintf(value, sizeof(value), "[%d,%d,%d]",
+             e->data.value.motion[0],
+             e->data.value.motion[1],
+             e->data.value.motion[2]);
+    type = "MOTION";
+    break;
+  }
+
+  printf("%-15s  %10d  %-6s    %15s\n", e->room->name, e->timestamp, type, value);
+  printf("\n");
+
+  return C_ERR_OK;
 }
 
 /* ---- room_print ------------------------------------------------------------
@@ -189,3 +218,9 @@ void error_print(int code)
     break;
   }
 }
+
+/* ---- entry_print -----------------------------------------------------------
+  Purpose: Shift old entries to the right and find the correct spot the new entry
+  Params:
+    -
+ */

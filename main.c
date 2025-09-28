@@ -20,13 +20,17 @@ int main(void)
     }
     else if (choice == 2)
     {
+      printf("%-15s  %10s  %-6s    %15s\n", "Room", "Timestamp", "Type", "Value");
+      for (int i = 0; i < entries.size; i++)
+        status = entry_print(&entries.entries[i]);
     }
     else if (choice == 3)
     {
       printf("Here are list of (%i) rooms:\n", rooms.size);
       for (int i = 0; i < rooms.size; i++)
-        room_print(&rooms.rooms[i]);
+        status = room_print(&rooms.rooms[i]);
     }
+
     else if (choice == 4)
     {
       printf("Enter room name: ");
@@ -34,6 +38,7 @@ int main(void)
       buffer[strcspn(buffer, "\n")] = '\0';
       status = rooms_add(&rooms, buffer); // main operation
     }
+
     else if (choice == 5)
     {
       printf("== Adding New Entry. \n");
