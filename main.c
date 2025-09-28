@@ -2,7 +2,7 @@
 
 // Static declares that this function can only be found in this file and not during linking
 static void print_menu(int *choice);
-static void get_entry_value(ReadingValue *reading);
+static ReadingValue get_entry_value(int type);
 
 int main(void)
 {
@@ -34,7 +34,6 @@ int main(void)
       buffer[strcspn(buffer, "\n")] = '\0';
       status = rooms_add(&rooms, buffer); // main operation
     }
-
     else if (choice == 5)
     {
       printf("== Adding New Entry. \n");
@@ -49,10 +48,12 @@ int main(void)
       int timestamp;
       scanf("%d", &timestamp);
 
-      ReadingValue readingValue;
-      get_entry_value(&readingValue);
+      printf("Type (1=TEMP, 2=DB, 3=MOTION): ");
+      int type;
+      scanf("%d", &type);
+      ReadingValue reading = get_entry_value(type);
 
-      status = entries_create(&entries,room,type,timestamp);
+      status = entries_create(&entries, room, type, reading, timestamp);
     }
 
     else if (choice == 6)
@@ -101,34 +102,35 @@ void print_menu(int *choice)
   *choice = c;
 }
 
-void get_entry_value(ReadingValue *reading)
+ReadingValue get_entry_value(int type)
 {
-  printf("Type (1=TEMP, 2=DB, 3=MOTION): ");
-  int type;
-  scanf("%d", &type);
+  ReadingValue reading;
+
   switch (type)
   {
   case TYPE_TEMP:
     printf("Enter temperature: ");
     float temp;
     scanf("%f", &temp);
-    reading->temperature = temp;
+    reading.temperature = temp;
     break;
 
   case TYPE_DB:
     printf("Enter decibel: ");
     float decibel;
     scanf("%f", &decibel);
-    reading->decibels = decibel;
+    reading.decibels = decibel;
     break;
 
   default:
-    unsigned char l, m, r;
     printf("Enter motions: ");
-    scanf("%d %d %d", &l, &m, &r);
-    reading->motion[0] = l;
-    reading->motion[1] = m;
-    reading->motion[2] = r;
+    unsigned char l, f, r;
+    scanf("%s %s %s", &l, &f, &r);
+    reading.motion[0] = l;
+    reading.motion[1] = f;
+    reading.motion[2] = r;
     break;
   }
+
+  return reading;
 }

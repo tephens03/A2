@@ -29,7 +29,7 @@ int entry_cmp(const LogEntry *a, const LogEntry *b)
 ----------------------------------------------------------------------------- */
 Room *rooms_find(RoomCollection *rc, const char *room_name)
 {
-  for (int i = 0; i < rc->rooms->size; i++)
+  for (int i = 0; i < rc->size; i++)
     if (strcmp(rc->rooms[i].name, room_name) == 0)
       return &(rc->rooms[i]);
   return NULL;
@@ -88,6 +88,10 @@ int entries_create(EntryCollection *ec, Room *room, int type, ReadingValue value
   while (i > 0 && (status = entry_cmp(&ec->entries[i - 1], &newEntry)) > 0)
   {
     ec->entries[i] = ec->entries[i - 1];
+    // ec->entries[i].room;
+    for (int j = 0; j < ec->entries[i].room->size; j++) {
+      entry_cmp(&ec->entries[j], &newEntry);
+    }
     i--;
   }
 
@@ -120,17 +124,39 @@ int entry_print(const LogEntry *e)
 ----------------------------------------------------------------------------- */
 int room_print(const Room *r)
 {
-  printf("Room: %s (entries=%i)\n", r->name, r->size);
-  printf("%-35s %-10s %2s %10s\n", "Room", "Timestamp", "Type", "Value");
+  printf("Room: %s (entries=%d)\n", r->name, r->size);
+  printf("%-15s  %10s  %-6s    %15s\n", "Room", "Timestamp", "Type", "Value");
 
-  for (size_t i = 0; i < r->size; i++)
+  for (int i = 0; i < r->size; i++)
   {
     LogEntry *entry = r->entries[i];
-    printf("%-35s %-10s %2s %10s\n", r->name, entry->timestamp, entry->data.type, entry->data.value);
+    char value[MAX_STR];
+    const char *type;
+
+    switch (entry->data.type)
+    {
+    case TYPE_TEMP:
+      snprintf(value, sizeof(value), "%.1f C", entry->data.value.temperature);
+      type = "TEMP";
+      break;
+    case TYPE_DB:
+      snprintf(value, sizeof(value), "%d DB", entry->data.value.decibels);
+      type = "DB";
+      break;
+    default:
+      snprintf(value, sizeof(value), "[%d,%d,%d]",
+               entry->data.value.motion[0],
+               entry->data.value.motion[1],
+               entry->data.value.motion[2]);
+      type = "MOTION";
+      break;
+    }
+
+    printf("%-15s  %10d  %-6s    %15s\n", r->name, entry->timestamp, type, value);
   }
   printf("\n");
 
-  return C_ERR_NOT_IMPLEMENTED; // Remove once implemented
+  return C_ERR_OK;
 }
 
 void error_print(int code)
